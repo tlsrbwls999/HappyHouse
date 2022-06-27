@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.ssafy.happyhouse.model.mapper.MemberMapper">
+
+<select id="idCheck" parameterType="string" resultType="int">
+	select count(id)
+	from member
+	where id = #{id}
+</select>
+
+<insert id="registerMember" parameterType="MemberDto">
+	insert into member (id, name, password, email, age)
+	values (#{id}, #{name}, #{password}, #{email}, #{age})
+</insert>
+
+<select id="login" parameterType="map" resultType="MemberDto">
+	select *
+	from member
+	where id = #{id} and password = #{password}
+</select>
+
+<select id="listMember" resultType="memberDto">
+	select id, password, name, email, date_format(joindate, '%y.%m.%d') joindate
+	from member 
+	order by joindate desc;
+</select>
+
+<select id="getMember" parameterType="String" resultType="memberdto">
+	select id, password, name, email, date_format(joindate, '%y.%m.%d') joindate
+	from member
+	where id = #{id}
+</select>
+
+<update id="updateMember" parameterType="MemberDto">
+	update member
+	<trim prefix="set" suffixOverrides=",">
+		<if test="userPwd != null">password = #{password},</if>
+		<if test="email != null">email = #{email},</if>
+	</trim>
+	where id = #{id}
+</update>
+
+<delete id="deleteMember" parameterType="String">
+	delete from member
+	where id = #{id}
+</delete>
+
+<delete id="deleteFavorite" parameterType="String">
+	delete from favorite
+	where id = #{id}
+</delete>
+
+</mapper>

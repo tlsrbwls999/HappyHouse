@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ssafy.happyhouse.model.mapper.DashboardMapper">
+
+	
+	<resultMap type="hashMap" id="keyandvalue"></resultMap>
+
+	<select id="getAllAver" resultType="int">
+		select AVG(cast(replace(dealAmount, ',', '') as UNSIGNED INTEGER)) as dealvalue
+		from happyhouse.housedeal
+		where dealYear = 2019;
+    </select>
+    
+	<select id="getAverChange" resultMap="keyandvalue">
+		select dealMonth, AVG(cast(replace(dealAmount, ',', '') as UNSIGNED INTEGER)) as dealValue
+		from happyhouse.housedeal
+		group by dealMonth;
+    </select>
+    
+	<select id="getAverGugun" resultMap="keyandvalue">
+		select *
+		from (select concat(substring(info.dongCode from 1 for 5), "00000") as guguncd, AVG(cast(replace(deal.dealAmount, ',', '') as UNSIGNED INTEGER)) as dealvalue
+		from happyhouse.housedeal as deal, happyhouse.houseinfo as info
+		where deal.aptCode = info.aptCode
+		group by guguncd) as j left join happyhouse.guguncode as gugun
+		on j.guguncd = gugun.gugunCode
+		order by dealvalue desc;
+    </select>
+    
+    
+	<select id="getRankAver" resultMap="keyandvalue">
+		select info.dongCode as dong, dongcode.dongName, AVG(cast(replace(deal.dealAmount, ',', '') as UNSIGNED INTEGER)) as dealValue
+		from happyhouse.housedeal as deal, happyhouse.houseinfo as info, happyhouse.dongcode as dongcode
+		where deal.aptCode = info.aptCode and info.dongCode = dongcode.dongCode
+		group by dong
+		order by dealValue desc
+		limit 20;
+    </select>
+    
+    
+    
+	<select id="getRankArea" resultMap="keyandvalue">
+		select j.dongCode, j.dongName, j.dealValue/j.areaValue as dataValue
+		from(
+		select dong.dongCode, dong.dongName, SUM(cast(replace(deal.dealAmount, ',', '') as UNSIGNED INTEGER)) as dealValue, SUM(cast(SUBSTRING_INDEX(deal.area, '.', 1) as UNSIGNED INTEGER)) as areaValue
+		from happyhouse.housedeal as deal, happyhouse.houseinfo as info, happyhouse.dongcode as dong
+		where deal.aptCode = info.aptCode and info.dongCode = dong.dongCode
+		group by dongCode
+		order by dealValue desc
+		) as j
+		order by dataValue desc
+		limit 20;
+    </select>
+    
+    
+    
+    
+    
+</mapper>
